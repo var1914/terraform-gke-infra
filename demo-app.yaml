@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  labels:
+    app: demo-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      containers:
+      - name: demo-app
+        image: gcr.io/google-samples/hello-app:1.0
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+# Internal Service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app-internal
+spec:
+  selector:
+    app: demo-app
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+---
+# External Service (LoadBalancer)
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app-external
+spec:
+  selector:
+    app: demo-app
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: LoadBalancer
